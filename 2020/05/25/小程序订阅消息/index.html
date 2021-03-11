@@ -1,0 +1,127 @@
+<script type="text/javascript"
+color="220,220,220" opacity='0.7' zIndex="-2" count="200" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js">
+</script>
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"><meta name="author" content="John Doe"><meta name="renderer" content="webkit"><meta name="copyright" content="John Doe"><meta name="keywords" content="Hexo"><meta name="description" content=""><meta name="Cache-Control" content="no-cache"><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><title>小程序订阅消息 · Mr.Jack's Blog</title><link rel="stylesheet" href="/css/style.css?v=2018.7.9"><link rel="stylesheet" href="/css/animation.css?v=2018.7.9"><link rel="icon" href="/img/assets/favicon.ico"><link rel="stylesheet" href="https://cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css?version=1.5.6"><!-- scripts--><script>(function( w ){
+  "use strict";
+  // rel=preload support test
+  if( !w.loadCSS ){
+    w.loadCSS = function(){};
+  }
+  // define on the loadCSS obj
+  var rp = loadCSS.relpreload = {};
+  // rel=preload feature support test
+  // runs once and returns a function for compat purposes
+  rp.support = (function(){
+    var ret;
+    try {
+      ret = w.document.createElement( "link" ).relList.supports( "preload" );
+    } catch (e) {
+      ret = false;
+    }
+    return function(){
+      return ret;
+    };
+  })();
+
+  // if preload isn't supported, get an asynchronous load by using a non-matching media attribute
+  // then change that media back to its intended value on load
+  rp.bindMediaToggle = function( link ){
+    // remember existing media attr for ultimate state, or default to 'all'
+    var finalMedia = link.media || "all";
+
+    function enableStylesheet(){
+      link.media = finalMedia;
+    }
+
+    // bind load handlers to enable media
+    if( link.addEventListener ){
+      link.addEventListener( "load", enableStylesheet );
+    } else if( link.attachEvent ){
+      link.attachEvent( "onload", enableStylesheet );
+    }
+
+    // Set rel and non-applicable media type to start an async request
+    // note: timeout allows this to happen async to let rendering continue in IE
+    setTimeout(function(){
+      link.rel = "stylesheet";
+      link.media = "only x";
+    });
+    // also enable media after 3 seconds,
+    // which will catch very old browsers (android 2.x, old firefox) that don't support onload on link
+    setTimeout( enableStylesheet, 3000 );
+  };
+
+  // loop through link elements in DOM
+  rp.poly = function(){
+    // double check this to prevent external calls from running
+    if( rp.support() ){
+      return;
+    }
+    var links = w.document.getElementsByTagName( "link" );
+    for( var i = 0; i < links.length; i++ ){
+      var link = links[ i ];
+      // qualify links to those with rel=preload and as=style attrs
+      if( link.rel === "preload" && link.getAttribute( "as" ) === "style" && !link.getAttribute( "data-loadcss" ) ){
+        // prevent rerunning on link
+        link.setAttribute( "data-loadcss", true );
+        // bind listeners to toggle media back
+        rp.bindMediaToggle( link );
+      }
+    }
+  };
+
+  // if unsupported, run the polyfill
+  if( !rp.support() ){
+    // run once at least
+    rp.poly();
+
+    // rerun poly on an interval until onload
+    var run = w.setInterval( rp.poly, 500 );
+    if( w.addEventListener ){
+      w.addEventListener( "load", function(){
+        rp.poly();
+        w.clearInterval( run );
+      } );
+    } else if( w.attachEvent ){
+      w.attachEvent( "onload", function(){
+        rp.poly();
+        w.clearInterval( run );
+      } );
+    }
+  }
+
+
+  // commonjs
+  if( typeof exports !== "undefined" ){
+    exports.loadCSS = loadCSS;
+  }
+  else {
+    w.loadCSS = loadCSS;
+  }
+}( typeof global !== "undefined" ? global : this ) );</script><script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js" defer></script><script src="/js/main.js?v=2018.7.9" defer></script><!-- fancybox--><link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'"><script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.js" defer></script><!-- busuanzi--><script async src="//dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script><meta name="generator" content="Hexo 5.4.0"></head><body><section class="profile-close" id="cxo-profile"><div class="profile-avatar"><i class="fa fa-caret-left"></i><img src="/img/assets/cat.png"></div><!--.profile-saying
+  i.fa.fa-comment
+  .saying--><div class="cxo-profile-inner"><div class="profile-name">jackcao95</div><div class="profile-signature">for me</div><div class="read-progress"></div></div></section><header id="cxo-intro" style="height: 70vh;background-image: url(/img/intro/index-bg.png);"><nav id="cxo-intro-nav"><section><div class="intro-nav-title"><a href="/">Mr.Jack's Blog</a></div><div class="intro-nav-label-box"><a href="/">Home</a><a href="/about/">About</a><a href="/archives/">Archives</a><a href="/tags/">Tags</a></div><i class="fa fa-bars intro-nav-menu"><div class="intro-nav-drop"><a href="/">Home</a><a href="/about/">About</a><a href="/archives/">Archives</a><a href="/tags/">Tags</a></div></i><div class="clear"></div></section></nav><h1 class="post-title">小程序订阅消息</h1><div class="post-intros"><div class="post-intro-meta"><span class="post-intro-time"><i class="post-intro-calendar fa fa-calendar"></i><span>2020-05-25</span></span></div><div class="post-intro-read"><span> Word count: <span class="post-count">794</span> | Reading time: <span class="post-count">3</span>min</span></div></div></header><article class="cxo-up" id="cxo-content-outer"><section id="cxo-content-inner"><article class="article-entry" id="post"><p>小程序给用户推送消息原有方式是采用模板消息，用户通过表单生成formId来给推送消息，但小程序模板消息接口已于2020年1月10日下线，开发者可以使用另一种方式给用户推送消息：订阅消息。</p>
+<h2 id="请确认调试基础库的版本"><a href="#请确认调试基础库的版本" class="headerlink" title="请确认调试基础库的版本"></a>请确认调试基础库的版本</h2><p>建议使用V2.8.2及以后版本<br><img src="http://img1.sycdn.imooc.com/5e891b9400016c7515920692.png" alt="图片描述"></p>
+<h2 id="配置订阅消息模板"><a href="#配置订阅消息模板" class="headerlink" title="配置订阅消息模板"></a>配置订阅消息模板</h2><p>首先确认确认当前小程序的id和登录的公众平台是不是同一个，因为之前经常有同学具有多个公众平台账号，有可能是多个账号会弄混导致模板消息发送失败。</p>
+<p>在公众平台中配置模板消息，选择左边订阅消息菜单，然后点击右边添加按钮，根据自己需求选择消息模板<br><img src="http://img1.sycdn.imooc.com/5e891cb70001ceea24641308.png" alt="图片描述"></p>
+<h2 id="调起小程序订阅消息界面获取下发权限"><a href="#调起小程序订阅消息界面获取下发权限" class="headerlink" title="调起小程序订阅消息界面获取下发权限"></a>调起小程序订阅消息界面获取下发权限</h2><p>复制消息模板对应的模板ID，然后在小程序端调起订阅消息界面</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">const templateId &#x3D; &#39;xxxxxx&#39;</span><br><span class="line">wx.requestSubscribeMessage(&#123;</span><br><span class="line">    tmplIds: [templateId],</span><br><span class="line">    success(res) &#123;</span><br><span class="line">        if (res[templateId] &#x3D;&#x3D; &#39;accept&#39;) &#123;</span><br><span class="line">            &#x2F;&#x2F;用户同意了订阅，允许订阅消息</span><br><span class="line">            wx.showToast(&#123;</span><br><span class="line">	            title: &#39;订阅成功&#39;</span><br><span class="line">            &#125;)</span><br><span class="line">            &#125; else &#123;</span><br><span class="line">            &#x2F;&#x2F;用户拒绝了订阅，禁用订阅消息</span><br><span class="line">            wx.showToast(&#123;</span><br><span class="line">	            title: &#39;订阅失败&#39;</span><br><span class="line">            &#125;)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;,</span><br><span class="line">    fail(err) &#123;</span><br><span class="line">    console.error(err)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+
+<h2 id="云函数端下发订阅消息"><a href="#云函数端下发订阅消息" class="headerlink" title="云函数端下发订阅消息"></a>云函数端下发订阅消息</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">try &#123;</span><br><span class="line">   const wxContext &#x3D; cloud.getWXContext()</span><br><span class="line">   const templateId &#x3D; &#39;xxxxxx</span><br><span class="line"></span><br><span class="line">   return await cloud.openapi.subscribeMessage.send(&#123;</span><br><span class="line">     touser: wxContext.OPENID,</span><br><span class="line">     page: &#39;page&#x2F;index&#x2F;index&#39;,</span><br><span class="line">     lang: &#39;zh_CN&#39;,</span><br><span class="line">     data: &#123;</span><br><span class="line">       phrase1: &#123;</span><br><span class="line">         value: &#39;上课啦&#39;</span><br><span class="line">       &#125;,</span><br><span class="line">       thing2: &#123;</span><br><span class="line">         value: &#39;小程序开发&#39;</span><br><span class="line">       &#125;,</span><br><span class="line">       thing3: &#123;</span><br><span class="line">         value: &#39;订阅消息&#39;</span><br><span class="line">       &#125;</span><br><span class="line">     &#125;,</span><br><span class="line">     templateId: templateId,</span><br><span class="line">     miniprogramState: &#39;developer&#39;</span><br><span class="line">   &#125;)</span><br><span class="line">   console.log(result)</span><br><span class="line">   return result</span><br><span class="line"> &#125; catch (err) &#123;</span><br><span class="line">   console.log(err)</span><br><span class="line">   return err</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="设置订阅消息权限"><a href="#设置订阅消息权限" class="headerlink" title="设置订阅消息权限"></a>设置订阅消息权限</h2><p>在当前云函数下面，新建config.json文件</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  &quot;permissions&quot;: &#123;</span><br><span class="line">    &quot;openapi&quot;: [</span><br><span class="line">      &quot;subscribeMessage.send&quot;</span><br><span class="line">    ]</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="注意"><a href="#注意" class="headerlink" title="注意"></a>注意</h2><p>测试订阅消息需要在真机上测试，开发工具不能测试。<br>点击真机调试，用手机扫描二维码可以测试。<br>发送完消息以后，在微信页面的服务通知内，就能够看到推送的消息了。</p>
+<h2 id="代码参考"><a href="#代码参考" class="headerlink" title="代码参考"></a>代码参考</h2><p><a target="_blank" rel="noopener" href="https://github.com/xiecheng328/subscribeMessage">https://github.com/xiecheng328/subscribeMessage</a></p>
+<h2 id="小程序开发学习建议"><a href="#小程序开发学习建议" class="headerlink" title="小程序开发学习建议"></a>小程序开发学习建议</h2><ul>
+<li><p>多看<a target="_blank" rel="noopener" href="https://developers.weixin.qq.com/miniprogram/dev/framework/">官方文档</a>，小程序的官方文档写的非常的全面，涵盖了微信小程序开发的所有知识点，大家一定要多看微信小程序官方文档</p>
+</li>
+<li><p>多逛小程序<a target="_blank" rel="noopener" href="https://developers.weixin.qq.com/community/develop/question">开发社区</a>，关于微信小程序的新功能以及更新内容都会在社区上面通知，大家遇到技术问题也可以在上面提问，会有微信团队官方工程师帮助我们解答</p>
+</li>
+<li><p>多敲代码，多练习。只有自己不断的练习才能真正的得到提高</p>
+</li>
+<li><p>分析问题和解决问题的能力。这是需要时间不断积累的，在遇到问题的时候，一定要多思考，对于有错误信息的问题一定要认真翻译错误信息，大多数的错误线索都能够被找到</p>
+</li>
+</ul>
+</article><!-- lincense--><div class="post-paginator"><a class="prevSlogan" href="/2020/06/18/%E5%B0%8F%E7%A8%8B%E5%BA%8F%E6%90%9C%E7%B4%A2%E5%8A%9F%E8%83%BD%EF%BC%8C%E4%BA%91%E5%BC%80%E5%8F%91%E6%90%9C%E7%B4%A2%EF%BC%8C%E5%B0%8F%E7%A8%8B%E5%BA%8F%E4%BA%91%E5%BC%80%E5%8F%91%E6%A8%A1%E7%B3%8A%E6%90%9C%E7%B4%A2%EF%BC%8C%E5%90%8C%E6%97%B6%E6%90%9C%E7%B4%A2%E5%A4%9A%E4%B8%AA%E5%AD%97%E6%AE%B5/" title="小程序搜索功能，云开发搜索，小程序云开发模糊搜索，同时搜索多个字段"><span>< PreviousPost</span><br><span class="prevTitle">小程序搜索功能，云开发搜索，小程序云开发模糊搜索，同时搜索多个字段</span></a><a class="nextSlogan" href="/2020/04/22/%E6%8A%84%E7%AC%94%E8%AE%B0%EF%BC%9A%E5%B0%A4%E9%9B%A8%E6%BA%AA%E5%9C%A8Vue3-0-Beta%E7%9B%B4%E6%92%AD%E9%87%8C%E8%81%8A%E5%88%B0%E4%BA%86%E8%BF%99%E4%BA%9B%E2%80%A6/" title="抄笔记：尤雨溪在Vue3.0 Beta直播里聊到了这些…"><span>NextPost ></span><br><span class="nextTitle">抄笔记：尤雨溪在Vue3.0 Beta直播里聊到了这些…</span></a><div class="clear"></div></div><div id="comment"></div></section></article><footer id="cxo-footer-outer"><div id="cxo-footer-inner"><p class="footer-container"><span>Site by </span><a target="_blank" rel="noopener" href="http://hexo.io"><span>Hexo</span></a><span> | theme </span><a target="_blank" rel="noopener" href="https://github.com/Longlongyu/hexo-theme-Cxo"><span>Cxo</span></a></p><i class="fa fa-user"> </i><span id="busuanzi_value_site_uv"></span><span> | </span><i class="fa fa-eye"> </i><span id="busuanzi_value_site_pv"></span></div></footer><!-- catelog--><div class="toc-wrapper" style="top: 70vh;"><div class="toc-catalog"><i class="fa fa-list"> </i><span>CATALOG</span></div><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%AF%B7%E7%A1%AE%E8%AE%A4%E8%B0%83%E8%AF%95%E5%9F%BA%E7%A1%80%E5%BA%93%E7%9A%84%E7%89%88%E6%9C%AC"><span class="toc-number">1.</span> <span class="toc-text">请确认调试基础库的版本</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%85%8D%E7%BD%AE%E8%AE%A2%E9%98%85%E6%B6%88%E6%81%AF%E6%A8%A1%E6%9D%BF"><span class="toc-number">2.</span> <span class="toc-text">配置订阅消息模板</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%B0%83%E8%B5%B7%E5%B0%8F%E7%A8%8B%E5%BA%8F%E8%AE%A2%E9%98%85%E6%B6%88%E6%81%AF%E7%95%8C%E9%9D%A2%E8%8E%B7%E5%8F%96%E4%B8%8B%E5%8F%91%E6%9D%83%E9%99%90"><span class="toc-number">3.</span> <span class="toc-text">调起小程序订阅消息界面获取下发权限</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%91%E5%87%BD%E6%95%B0%E7%AB%AF%E4%B8%8B%E5%8F%91%E8%AE%A2%E9%98%85%E6%B6%88%E6%81%AF"><span class="toc-number">4.</span> <span class="toc-text">云函数端下发订阅消息</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%AE%BE%E7%BD%AE%E8%AE%A2%E9%98%85%E6%B6%88%E6%81%AF%E6%9D%83%E9%99%90"><span class="toc-number">5.</span> <span class="toc-text">设置订阅消息权限</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%B3%A8%E6%84%8F"><span class="toc-number">6.</span> <span class="toc-text">注意</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BB%A3%E7%A0%81%E5%8F%82%E8%80%83"><span class="toc-number">7.</span> <span class="toc-text">代码参考</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B0%8F%E7%A8%8B%E5%BA%8F%E5%BC%80%E5%8F%91%E5%AD%A6%E4%B9%A0%E5%BB%BA%E8%AE%AE"><span class="toc-number">8.</span> <span class="toc-text">小程序开发学习建议</span></a></li></ol></div><!-- top--><i class="fa fa-arrow-up close" id="go-up" aria-hidden="true"></i><script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/wanko.model.json"},"display":{"position":"right","width":245,"height":415},"mobile":{"show":false,"scale":0.5},"react":{"opacityDefault":0.7},"log":false});</script></body></html>
