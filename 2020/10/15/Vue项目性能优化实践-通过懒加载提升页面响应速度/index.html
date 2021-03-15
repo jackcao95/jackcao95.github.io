@@ -1,0 +1,138 @@
+<script type="text/javascript"
+color="220,220,220" opacity='0.7' zIndex="-2" count="200" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js">
+</script>
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"><meta name="author" content="John Doe"><meta name="renderer" content="webkit"><meta name="copyright" content="John Doe"><meta name="keywords" content="Hexo"><meta name="description" content=""><meta name="Cache-Control" content="no-cache"><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><title>Vue项目性能优化实践-通过懒加载提升页面响应速度 · Mr.Jack's Blog</title><link rel="stylesheet" href="/css/style.css?v=2018.7.9"><link rel="stylesheet" href="/css/animation.css?v=2018.7.9"><link rel="icon" href="/img/assets/favicon.ico"><link rel="stylesheet" href="https://cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css?version=1.5.6"><!-- scripts--><script>(function( w ){
+  "use strict";
+  // rel=preload support test
+  if( !w.loadCSS ){
+    w.loadCSS = function(){};
+  }
+  // define on the loadCSS obj
+  var rp = loadCSS.relpreload = {};
+  // rel=preload feature support test
+  // runs once and returns a function for compat purposes
+  rp.support = (function(){
+    var ret;
+    try {
+      ret = w.document.createElement( "link" ).relList.supports( "preload" );
+    } catch (e) {
+      ret = false;
+    }
+    return function(){
+      return ret;
+    };
+  })();
+
+  // if preload isn't supported, get an asynchronous load by using a non-matching media attribute
+  // then change that media back to its intended value on load
+  rp.bindMediaToggle = function( link ){
+    // remember existing media attr for ultimate state, or default to 'all'
+    var finalMedia = link.media || "all";
+
+    function enableStylesheet(){
+      link.media = finalMedia;
+    }
+
+    // bind load handlers to enable media
+    if( link.addEventListener ){
+      link.addEventListener( "load", enableStylesheet );
+    } else if( link.attachEvent ){
+      link.attachEvent( "onload", enableStylesheet );
+    }
+
+    // Set rel and non-applicable media type to start an async request
+    // note: timeout allows this to happen async to let rendering continue in IE
+    setTimeout(function(){
+      link.rel = "stylesheet";
+      link.media = "only x";
+    });
+    // also enable media after 3 seconds,
+    // which will catch very old browsers (android 2.x, old firefox) that don't support onload on link
+    setTimeout( enableStylesheet, 3000 );
+  };
+
+  // loop through link elements in DOM
+  rp.poly = function(){
+    // double check this to prevent external calls from running
+    if( rp.support() ){
+      return;
+    }
+    var links = w.document.getElementsByTagName( "link" );
+    for( var i = 0; i < links.length; i++ ){
+      var link = links[ i ];
+      // qualify links to those with rel=preload and as=style attrs
+      if( link.rel === "preload" && link.getAttribute( "as" ) === "style" && !link.getAttribute( "data-loadcss" ) ){
+        // prevent rerunning on link
+        link.setAttribute( "data-loadcss", true );
+        // bind listeners to toggle media back
+        rp.bindMediaToggle( link );
+      }
+    }
+  };
+
+  // if unsupported, run the polyfill
+  if( !rp.support() ){
+    // run once at least
+    rp.poly();
+
+    // rerun poly on an interval until onload
+    var run = w.setInterval( rp.poly, 500 );
+    if( w.addEventListener ){
+      w.addEventListener( "load", function(){
+        rp.poly();
+        w.clearInterval( run );
+      } );
+    } else if( w.attachEvent ){
+      w.attachEvent( "onload", function(){
+        rp.poly();
+        w.clearInterval( run );
+      } );
+    }
+  }
+
+
+  // commonjs
+  if( typeof exports !== "undefined" ){
+    exports.loadCSS = loadCSS;
+  }
+  else {
+    w.loadCSS = loadCSS;
+  }
+}( typeof global !== "undefined" ? global : this ) );</script><script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js" defer></script><script src="/js/main.js?v=2018.7.9" defer></script><!-- fancybox--><link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'"><script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.js" defer></script><!-- busuanzi--><script async src="//dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script><meta name="generator" content="Hexo 5.4.0"></head><body><section class="profile-close" id="cxo-profile"><div class="profile-avatar"><i class="fa fa-caret-left"></i><img src="/img/assets/cat.png"></div><!--.profile-saying
+  i.fa.fa-comment
+  .saying--><div class="cxo-profile-inner"><div class="profile-name">jackcao95</div><div class="profile-signature">for me</div><div class="read-progress"></div></div></section><header id="cxo-intro" style="height: 70vh;background-image: url(/img/intro/index-bg.png);"><nav id="cxo-intro-nav"><section><div class="intro-nav-title"><a href="/">Mr.Jack's Blog</a></div><div class="intro-nav-label-box"><a href="/">Home</a><a href="/about/">About</a><a href="/archives/">Archives</a><a href="/tags/">Tags</a></div><i class="fa fa-bars intro-nav-menu"><div class="intro-nav-drop"><a href="/">Home</a><a href="/about/">About</a><a href="/archives/">Archives</a><a href="/tags/">Tags</a></div></i><div class="clear"></div></section></nav><h1 class="post-title">Vue项目性能优化实践-通过懒加载提升页面响应速度</h1><div class="post-intros"><div class="post-intro-meta"><span class="post-intro-time"><i class="post-intro-calendar fa fa-calendar"></i><span>2020-10-15</span></span></div><div class="post-intro-read"><span> Word count: <span class="post-count">1.1k</span> | Reading time: <span class="post-count">3</span>min</span></div></div></header><article class="cxo-up" id="cxo-content-outer"><section id="cxo-content-inner"><article class="article-entry" id="post"><h3 id="什么是懒加载？"><a href="#什么是懒加载？" class="headerlink" title="什么是懒加载？"></a>什么是懒加载？</h3><p>懒加载也叫做延时加载，在网页响应时不立刻请求资源，待页面加载完毕或者按需响应时再加载资源，以达到提高页面响应速度以及节省服务器资源的谜底。网页中常用的懒加载是图片的懒加载，对于类似淘宝一样的多图页面，如果等待所有图片都下载完成再响应用不必然造成页面加载的卡顿。对于 JS 资源的加载也是同样的道理，大 JS 的加载会造成 JS 阻塞，页面出现停止响应的假死状态。因此可以通过按需加载的方式，提高页面首屏的加载速度。</p>
+<p>总结了具体优化步骤，下面我们就开始着手优化吧！</p>
+<h3 id="开始优化"><a href="#开始优化" class="headerlink" title="开始优化"></a>开始优化</h3><p>首先是项目环境：Vue 2.6</p>
+<p>开发环境：Vue-cli 4.5 + TypeScript 3.9</p>
+<h4 id="划分业务模块"><a href="#划分业务模块" class="headerlink" title="划分业务模块"></a>划分业务模块</h4><p>通过路由异步加载模块，加速首屏以及其他页面加载速度，在 Vue Router 中将 webExcel 模块配置为懒加载模式，配置后 webExcel 组件会按照指定的 webpackChunkName 打包为单独的文件，并在访问 webExcel 路由的时候才会加载。这样访问 home 以及 about 页面时并不会加载 webExcel 资源。</p>
+<p><img src="http://img4.sycdn.imooc.com/5ff7bc1b0001776910110687.jpg" alt="img"></p>
+<p><strong>懒加载路由配置</strong></p>
+<p>打包发布访问页面，首屏秒开，直接访问 about 依旧秒开。可是查看网络请求时候发现访问首页时请求了 about 和 web Excel 的资源。经过排查发现 vue-cli 在页面中使用了 preload 和 prefetch 预加载机制，在不影响当前页面加载的情况下预加载后续页面需要的资源提升用户体验，这里为了演示清晰注释掉 prefetch 的资源。</p>
+<p><img src="http://img2.sycdn.imooc.com/5ff7bc1c00013a1807490435.jpg" alt="img"></p>
+<p>（临时禁用 prefetch 预加载）</p>
+<p>开启路由懒加载后首页并未加载 about 和 webExcel。</p>
+<p><img src="http://img4.sycdn.imooc.com/5ff7bc1c0001f94611010636.jpg" alt="img"></p>
+<p>（首页 Home 网络请求）</p>
+<p>清理网络请求记录，点击 Web Excel，访问 webExcel 页面，此时会请求 webExcel 资源并展示组件。</p>
+<p><img src="http://img1.sycdn.imooc.com/5ff7bc1c000119b610990661.jpg" alt="img"></p>
+<p>（webExcel 页面网络请求）</p>
+<h4 id="在线-Excel-组件懒加载，进一步优化使用插件页面打开速度"><a href="#在线-Excel-组件懒加载，进一步优化使用插件页面打开速度" class="headerlink" title="在线 Excel 组件懒加载，进一步优化使用插件页面打开速度"></a>在线 Excel 组件懒加载，进一步优化使用插件页面打开速度</h4><p>优化了路由加载，为了提升用户体验，进一步优化 webExcel 页面，开启组件懒加载，当需要 Designer 组件的时候再加载。</p>
+<p>开启异步组件的方式类似于路由，直接配置 import 组件即可，替换原有的静态 import。</p>
+<p><img src="http://img1.sycdn.imooc.com/5ff7bc1d00015bc910790375.jpg" alt="img"></p>
+<p>（组件懒加载）</p>
+<p>这里我们一步到位使用 AsyncComponent 配置，这样在加载组件（loading）时候可以给用户一个提示。</p>
+<p><img src="http://img4.sycdn.imooc.com/5ff7bc1d0001624404580152.jpg" alt="img"></p>
+<p>（页面模板）</p>
+<p><img src="http://img3.sycdn.imooc.com/5ff7bc1d0001519d11260713.jpg" alt="img"></p>
+<p>（异步组件懒加载）</p>
+<p>页面上通过 displayDesigner 属性控制 Designer 组件是否显示，setTimeout 3 秒后开始加载 Designer 组件并展示。LoadingComponent 在加载时展示 loading 状态。</p>
+<p><img src="http://img1.sycdn.imooc.com/5ff7bc1e0001383911000832.jpg" alt="img"></p>
+<p><img src="http://img1.sycdn.imooc.com/5ff7bc1e0001235612220929.jpg" alt="img"></p>
+<p>可以从网络请求中看到，webExcel 加载完 3 秒后开始请求 designer 资源，请求时显示 LoadingComponent，请求完毕展示 Desinger 组件。</p>
+<h4 id="开启-gzip-压缩，加速资源请求速度"><a href="#开启-gzip-压缩，加速资源请求速度" class="headerlink" title="开启 gzip 压缩，加速资源请求速度"></a>开启 gzip 压缩，加速资源请求速度</h4><p>为了进一步加速资源请求，可以开启服务器 gizp 压缩，目前大部分浏览器都支持 gzip，可以开启服务器的 gzip 功能，服务器在传输资源之前先进行压缩。</p>
+<p>网络请求 Request 中会出现如下内容，就表示支持 gzip</p>
+<p>Accept-Encoding: gzip, deflate, br</p>
+<p>Vue-cli 可以在打包时就将资源提前进行 gzip 打包，这样服务器直接返回打包后的资源不需要再次打包了。通过使用 compression-webpack-plugin 插件可以在打包时直接生成 gz 压缩文件。关于 gzip 的配置可以根据具体部署情况设置。</p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>经过以上优化，首屏加载资源仅需 Vue 基础组件和 Home 页面组件，首屏加载速度回复到原始 200 毫秒。其他未使用 Designer 组件的页面也无需加载资源，同时 Designer 组件加载一次，后续其他页面再使用组件也无需再次加载</p>
+<p>以上就是关于 Vue 路由和组件懒加载的一些配置，不过懒加载不是万能的，还是要从实际需求出发决定是否使用。</p>
+</article><!-- lincense--><div class="post-paginator"><a class="prevSlogan" href="/2020/10/17/%E4%BD%BF%E7%94%A8TypeScript%E7%9A%84%E4%B8%80%E4%BA%9B%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A1%B9/" title="使用TypeScript的一些注意事项"><span>< PreviousPost</span><br><span class="prevTitle">使用TypeScript的一些注意事项</span></a><a class="nextSlogan" href="/2020/10/11/TypeScript%E5%85%A5%E9%97%A8/" title="TypeScript入门"><span>NextPost ></span><br><span class="nextTitle">TypeScript入门</span></a><div class="clear"></div></div><div id="comment"></div></section></article><footer id="cxo-footer-outer"><div id="cxo-footer-inner"><p class="footer-container"><span>Site by </span><a target="_blank" rel="noopener" href="http://hexo.io"><span>Hexo</span></a><span> | theme </span><a target="_blank" rel="noopener" href="https://github.com/Longlongyu/hexo-theme-Cxo"><span>Cxo</span></a></p><i class="fa fa-user"> </i><span id="busuanzi_value_site_uv"></span><span> | </span><i class="fa fa-eye"> </i><span id="busuanzi_value_site_pv"></span></div></footer><!-- catelog--><div class="toc-wrapper" style="top: 70vh;"><div class="toc-catalog"><i class="fa fa-list"> </i><span>CATALOG</span></div><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E6%87%92%E5%8A%A0%E8%BD%BD%EF%BC%9F"><span class="toc-number">1.</span> <span class="toc-text">什么是懒加载？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BC%80%E5%A7%8B%E4%BC%98%E5%8C%96"><span class="toc-number">2.</span> <span class="toc-text">开始优化</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%88%92%E5%88%86%E4%B8%9A%E5%8A%A1%E6%A8%A1%E5%9D%97"><span class="toc-number">2.1.</span> <span class="toc-text">划分业务模块</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%9C%A8%E7%BA%BF-Excel-%E7%BB%84%E4%BB%B6%E6%87%92%E5%8A%A0%E8%BD%BD%EF%BC%8C%E8%BF%9B%E4%B8%80%E6%AD%A5%E4%BC%98%E5%8C%96%E4%BD%BF%E7%94%A8%E6%8F%92%E4%BB%B6%E9%A1%B5%E9%9D%A2%E6%89%93%E5%BC%80%E9%80%9F%E5%BA%A6"><span class="toc-number">2.2.</span> <span class="toc-text">在线 Excel 组件懒加载，进一步优化使用插件页面打开速度</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%BC%80%E5%90%AF-gzip-%E5%8E%8B%E7%BC%A9%EF%BC%8C%E5%8A%A0%E9%80%9F%E8%B5%84%E6%BA%90%E8%AF%B7%E6%B1%82%E9%80%9F%E5%BA%A6"><span class="toc-number">2.3.</span> <span class="toc-text">开启 gzip 压缩，加速资源请求速度</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">3.</span> <span class="toc-text">总结</span></a></li></ol></div><!-- top--><i class="fa fa-arrow-up close" id="go-up" aria-hidden="true"></i><script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/wanko.model.json"},"display":{"position":"right","width":245,"height":415},"mobile":{"show":false,"scale":0.5},"react":{"opacityDefault":0.7},"log":false});</script></body></html>

@@ -1,0 +1,121 @@
+<script type="text/javascript"
+color="220,220,220" opacity='0.7' zIndex="-2" count="200" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js">
+</script>
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"><meta name="author" content="John Doe"><meta name="renderer" content="webkit"><meta name="copyright" content="John Doe"><meta name="keywords" content="Hexo"><meta name="description" content=""><meta name="Cache-Control" content="no-cache"><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><title>借助axios的拦截器实现Vue.js中登录状态检验的思路 · Mr.Jack's Blog</title><link rel="stylesheet" href="/css/style.css?v=2018.7.9"><link rel="stylesheet" href="/css/animation.css?v=2018.7.9"><link rel="icon" href="/img/assets/favicon.ico"><link rel="stylesheet" href="https://cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css?version=1.5.6"><!-- scripts--><script>(function( w ){
+  "use strict";
+  // rel=preload support test
+  if( !w.loadCSS ){
+    w.loadCSS = function(){};
+  }
+  // define on the loadCSS obj
+  var rp = loadCSS.relpreload = {};
+  // rel=preload feature support test
+  // runs once and returns a function for compat purposes
+  rp.support = (function(){
+    var ret;
+    try {
+      ret = w.document.createElement( "link" ).relList.supports( "preload" );
+    } catch (e) {
+      ret = false;
+    }
+    return function(){
+      return ret;
+    };
+  })();
+
+  // if preload isn't supported, get an asynchronous load by using a non-matching media attribute
+  // then change that media back to its intended value on load
+  rp.bindMediaToggle = function( link ){
+    // remember existing media attr for ultimate state, or default to 'all'
+    var finalMedia = link.media || "all";
+
+    function enableStylesheet(){
+      link.media = finalMedia;
+    }
+
+    // bind load handlers to enable media
+    if( link.addEventListener ){
+      link.addEventListener( "load", enableStylesheet );
+    } else if( link.attachEvent ){
+      link.attachEvent( "onload", enableStylesheet );
+    }
+
+    // Set rel and non-applicable media type to start an async request
+    // note: timeout allows this to happen async to let rendering continue in IE
+    setTimeout(function(){
+      link.rel = "stylesheet";
+      link.media = "only x";
+    });
+    // also enable media after 3 seconds,
+    // which will catch very old browsers (android 2.x, old firefox) that don't support onload on link
+    setTimeout( enableStylesheet, 3000 );
+  };
+
+  // loop through link elements in DOM
+  rp.poly = function(){
+    // double check this to prevent external calls from running
+    if( rp.support() ){
+      return;
+    }
+    var links = w.document.getElementsByTagName( "link" );
+    for( var i = 0; i < links.length; i++ ){
+      var link = links[ i ];
+      // qualify links to those with rel=preload and as=style attrs
+      if( link.rel === "preload" && link.getAttribute( "as" ) === "style" && !link.getAttribute( "data-loadcss" ) ){
+        // prevent rerunning on link
+        link.setAttribute( "data-loadcss", true );
+        // bind listeners to toggle media back
+        rp.bindMediaToggle( link );
+      }
+    }
+  };
+
+  // if unsupported, run the polyfill
+  if( !rp.support() ){
+    // run once at least
+    rp.poly();
+
+    // rerun poly on an interval until onload
+    var run = w.setInterval( rp.poly, 500 );
+    if( w.addEventListener ){
+      w.addEventListener( "load", function(){
+        rp.poly();
+        w.clearInterval( run );
+      } );
+    } else if( w.attachEvent ){
+      w.attachEvent( "onload", function(){
+        rp.poly();
+        w.clearInterval( run );
+      } );
+    }
+  }
+
+
+  // commonjs
+  if( typeof exports !== "undefined" ){
+    exports.loadCSS = loadCSS;
+  }
+  else {
+    w.loadCSS = loadCSS;
+  }
+}( typeof global !== "undefined" ? global : this ) );</script><script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js" defer></script><script src="/js/main.js?v=2018.7.9" defer></script><!-- fancybox--><link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'"><script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.js" defer></script><!-- busuanzi--><script async src="//dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script><meta name="generator" content="Hexo 5.4.0"></head><body><section class="profile-close" id="cxo-profile"><div class="profile-avatar"><i class="fa fa-caret-left"></i><img src="/img/assets/cat.png"></div><!--.profile-saying
+  i.fa.fa-comment
+  .saying--><div class="cxo-profile-inner"><div class="profile-name">jackcao95</div><div class="profile-signature">for me</div><div class="read-progress"></div></div></section><header id="cxo-intro" style="height: 70vh;background-image: url(/img/intro/index-bg.png);"><nav id="cxo-intro-nav"><section><div class="intro-nav-title"><a href="/">Mr.Jack's Blog</a></div><div class="intro-nav-label-box"><a href="/">Home</a><a href="/about/">About</a><a href="/archives/">Archives</a><a href="/tags/">Tags</a></div><i class="fa fa-bars intro-nav-menu"><div class="intro-nav-drop"><a href="/">Home</a><a href="/about/">About</a><a href="/archives/">Archives</a><a href="/tags/">Tags</a></div></i><div class="clear"></div></section></nav><h1 class="post-title">借助axios的拦截器实现Vue.js中登录状态检验的思路</h1><div class="post-intros"><div class="post-intro-meta"><span class="post-intro-time"><i class="post-intro-calendar fa fa-calendar"></i><span>2020-11-03</span></span></div><div class="post-intro-read"><span> Word count: <span class="post-count">1k</span> | Reading time: <span class="post-count">4</span>min</span></div></div></header><article class="cxo-up" id="cxo-content-outer"><section id="cxo-content-inner"><article class="article-entry" id="post"><p>在做Vue中的登陆校验时，思路应该是这样的：先确定一个路由页面是否需要登陆才能访问，如果需要，就需要用户登陆，如果不需要，用户直接可以访问。</p>
+<p>那么，首先来说，后台系统中，不一定每一个页面都要进行登陆权限，所以我们要通过路由的meta标签对需要做校验的路由页面做好标记，在配置路由时，我们可以在meta属性中，加入是否需要登陆的字段，如果requireAuth是true，就说明这条路由需要登陆才能访问：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  path: &#39;&#x2F;userInfo&#39;,</span><br><span class="line">  name: &#39;userInfo&#39;,</span><br><span class="line">  meta: &#123;</span><br><span class="line">    requireAuth: true,  &#x2F;&#x2F; 该路由项需要权限校验</span><br><span class="line">  &#125;</span><br><span class="line">  component: userInfo</span><br><span class="line">&#125;, &#123;</span><br><span class="line">  path: &#39;&#x2F;userList&#39;,</span><br><span class="line">  name: &#39;userList&#39;,    &#x2F;&#x2F; 该路由项不需要权限校验    </span><br><span class="line">  component: userInfo</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>之后，我们可以定义一个路由守卫，每次路由跳转，我们都来做一次权限校验，参考如下代码</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">router.beforeEach((to, from, next) &#x3D;&gt; &#123;</span><br><span class="line">  if(to.meta.requireAuth) &#123; &#x2F;&#x2F; 如果路由项需要权限校验</span><br><span class="line">    &#x2F;* </span><br><span class="line">      从Vuex拿出token码，说明已登陆</span><br><span class="line">     （前端的token可伪造，所以这并不是完全靠谱，后面继续说）</span><br><span class="line">    *&#x2F;</span><br><span class="line">    if (store.state.token) &#123; </span><br><span class="line">      next() &#x2F;&#x2F; 正常跳转页面</span><br><span class="line">    &#125; else &#123;</span><br><span class="line">      next(&#123;</span><br><span class="line">        path: &#39;&#x2F;login&#39;,</span><br><span class="line">        query: &#123;redirect: to.fullPath&#125;  </span><br><span class="line">        &#x2F;* 将跳转的路由地址作为参数带给登陆页，登录成功后跳转回该页面 *&#x2F;</span><br><span class="line">      &#125;)</span><br><span class="line">    &#125;</span><br><span class="line">  &#125; else &#123; &#x2F;&#x2F; 如果不需要权限校验，直接进入路由页面</span><br><span class="line">      next();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+
+<p>如果用户的Vuex中登陆状态（token）存在，就说明登陆了，如果没有值，就跳转去登陆页面。用户在登陆页面登陆后，要在Vuex中保存登陆状态（token）。（实际上如果做持久存储，还应该把登陆状态存在localStorage或者cookie中）</p>
+<p>然而，单纯这么来做并不靠谱，首先，token可以用户自己伪造，其次，有可能token在前端存在，但是由于登陆时间过长， 已经超出登陆最长时效期，这时，后端中，这个token已经失效。</p>
+<p>所以，这么做权限校验并不准确，那么接下来，我们可以在发请求的时候，通过后端的一层校验，进一步确保权限状态的准确性。</p>
+<p>这一步，要用到axios里面的拦截器，所以以下代码建立在项目使用axios的基础上。axios的拦截器（Interceptors），默认配置（axios.defaults）还有 axios.create() 创建出的实例实际上在封装请求时非常有用，如果你没接触过，赶紧到官方文档看一下！</p>
+<p>我们先来看，在每次请求时，我们进行如下的拦截，这么做的意思是，如果前端有token，我每次都把token给后端，后端拿到这个token后会到后端再进行一次权限校验，然后把校验结果在接口中反馈：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">axios.interceptors.request.use( requestConfig &#x3D;&gt; &#123;</span><br><span class="line">  if (store.state.token) &#123;</span><br><span class="line">    config.headers.Authorization &#x3D; &#96;$&#123;store.state.token&#125;&#96;;</span><br><span class="line">  &#125;</span><br><span class="line">  return requestConfig;</span><br><span class="line">&#125;, err &#x3D;&gt; &#123;</span><br><span class="line">  return Promise.reject(err);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<p>然后我们再来看，对应一定要再写一个response拦截器，处理响应数据。如果后端拿到前端的token，发现token失效，我们要求后端接口返回401的返回码，这样，前端就可以这么处理了：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">axios.interceptors.response.use( response &#x3D;&gt; &#123;</span><br><span class="line">    return response;</span><br><span class="line">  &#125;, error &#x3D;&gt; &#123;</span><br><span class="line">    if (error.response) &#123;</span><br><span class="line">      switch (error.response.status) &#123;</span><br><span class="line">        case 401:  </span><br><span class="line">          &#x2F;* </span><br><span class="line">            返回 401 表示前端的token已失效</span><br><span class="line">            当然，你也可以和后端也定其他的方式来表示token失效</span><br><span class="line">            需要前端清除Vuex中的token，页面跳转到登陆页</span><br><span class="line">          *&#x2F; </span><br><span class="line">          store.commit(types.LOGOUT);</span><br><span class="line">          router.replace(&#123;</span><br><span class="line">            path: &#39;login&#39;,</span><br><span class="line">            query: &#123;</span><br><span class="line">              redirect: router.currentRoute.fullPath</span><br><span class="line">            &#125;</span><br><span class="line">          &#125;)</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    return Promise.reject(error.response.data) &#x2F;&#x2F;返回接口返回的错误信息</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<p>借助axios的拦截器，我们不但前端做了登陆校验，而且每次请求后端接口的时候，都会携带数据让后端再次做登陆校验，这样的一个登陆校验流程就很标准了。</p>
+</article><!-- lincense--><div class="post-paginator"><a class="prevSlogan" href="/2020/12/23/%E4%BD%A0%E4%B8%8D%E7%9F%A5%E9%81%93%E7%9A%84webpack%E5%92%8Cwebpack-dev-serve%E9%AB%98%E7%BA%A7%E7%8E%A9%E6%B3%95/" title="你不知道的webpack和webpack-dev-serve高级玩法"><span>< PreviousPost</span><br><span class="prevTitle">你不知道的webpack和webpack-dev-serve高级玩法</span></a><a class="nextSlogan" href="/2020/10/17/%E4%BD%BF%E7%94%A8TypeScript%E7%9A%84%E4%B8%80%E4%BA%9B%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A1%B9/" title="使用TypeScript的一些注意事项"><span>NextPost ></span><br><span class="nextTitle">使用TypeScript的一些注意事项</span></a><div class="clear"></div></div><div id="comment"></div></section></article><footer id="cxo-footer-outer"><div id="cxo-footer-inner"><p class="footer-container"><span>Site by </span><a target="_blank" rel="noopener" href="http://hexo.io"><span>Hexo</span></a><span> | theme </span><a target="_blank" rel="noopener" href="https://github.com/Longlongyu/hexo-theme-Cxo"><span>Cxo</span></a></p><i class="fa fa-user"> </i><span id="busuanzi_value_site_uv"></span><span> | </span><i class="fa fa-eye"> </i><span id="busuanzi_value_site_pv"></span></div></footer><!-- catelog--><div class="toc-wrapper" style="top: 70vh;"><div class="toc-catalog"><i class="fa fa-list"> </i><span>CATALOG</span></div></div><!-- top--><i class="fa fa-arrow-up close" id="go-up" aria-hidden="true"></i><script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/wanko.model.json"},"display":{"position":"right","width":245,"height":415},"mobile":{"show":false,"scale":0.5},"react":{"opacityDefault":0.7},"log":false});</script></body></html>

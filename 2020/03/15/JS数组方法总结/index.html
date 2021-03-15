@@ -1,0 +1,155 @@
+<script type="text/javascript"
+color="220,220,220" opacity='0.7' zIndex="-2" count="200" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js">
+</script>
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"><meta name="author" content="John Doe"><meta name="renderer" content="webkit"><meta name="copyright" content="John Doe"><meta name="keywords" content="Hexo"><meta name="description" content=""><meta name="Cache-Control" content="no-cache"><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><title>JS数组方法总结 · Mr.Jack's Blog</title><link rel="stylesheet" href="/css/style.css?v=2018.7.9"><link rel="stylesheet" href="/css/animation.css?v=2018.7.9"><link rel="icon" href="/img/assets/favicon.ico"><link rel="stylesheet" href="https://cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css?version=1.5.6"><!-- scripts--><script>(function( w ){
+  "use strict";
+  // rel=preload support test
+  if( !w.loadCSS ){
+    w.loadCSS = function(){};
+  }
+  // define on the loadCSS obj
+  var rp = loadCSS.relpreload = {};
+  // rel=preload feature support test
+  // runs once and returns a function for compat purposes
+  rp.support = (function(){
+    var ret;
+    try {
+      ret = w.document.createElement( "link" ).relList.supports( "preload" );
+    } catch (e) {
+      ret = false;
+    }
+    return function(){
+      return ret;
+    };
+  })();
+
+  // if preload isn't supported, get an asynchronous load by using a non-matching media attribute
+  // then change that media back to its intended value on load
+  rp.bindMediaToggle = function( link ){
+    // remember existing media attr for ultimate state, or default to 'all'
+    var finalMedia = link.media || "all";
+
+    function enableStylesheet(){
+      link.media = finalMedia;
+    }
+
+    // bind load handlers to enable media
+    if( link.addEventListener ){
+      link.addEventListener( "load", enableStylesheet );
+    } else if( link.attachEvent ){
+      link.attachEvent( "onload", enableStylesheet );
+    }
+
+    // Set rel and non-applicable media type to start an async request
+    // note: timeout allows this to happen async to let rendering continue in IE
+    setTimeout(function(){
+      link.rel = "stylesheet";
+      link.media = "only x";
+    });
+    // also enable media after 3 seconds,
+    // which will catch very old browsers (android 2.x, old firefox) that don't support onload on link
+    setTimeout( enableStylesheet, 3000 );
+  };
+
+  // loop through link elements in DOM
+  rp.poly = function(){
+    // double check this to prevent external calls from running
+    if( rp.support() ){
+      return;
+    }
+    var links = w.document.getElementsByTagName( "link" );
+    for( var i = 0; i < links.length; i++ ){
+      var link = links[ i ];
+      // qualify links to those with rel=preload and as=style attrs
+      if( link.rel === "preload" && link.getAttribute( "as" ) === "style" && !link.getAttribute( "data-loadcss" ) ){
+        // prevent rerunning on link
+        link.setAttribute( "data-loadcss", true );
+        // bind listeners to toggle media back
+        rp.bindMediaToggle( link );
+      }
+    }
+  };
+
+  // if unsupported, run the polyfill
+  if( !rp.support() ){
+    // run once at least
+    rp.poly();
+
+    // rerun poly on an interval until onload
+    var run = w.setInterval( rp.poly, 500 );
+    if( w.addEventListener ){
+      w.addEventListener( "load", function(){
+        rp.poly();
+        w.clearInterval( run );
+      } );
+    } else if( w.attachEvent ){
+      w.attachEvent( "onload", function(){
+        rp.poly();
+        w.clearInterval( run );
+      } );
+    }
+  }
+
+
+  // commonjs
+  if( typeof exports !== "undefined" ){
+    exports.loadCSS = loadCSS;
+  }
+  else {
+    w.loadCSS = loadCSS;
+  }
+}( typeof global !== "undefined" ? global : this ) );</script><script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js" defer></script><script src="/js/main.js?v=2018.7.9" defer></script><!-- fancybox--><link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'"><script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.js" defer></script><!-- busuanzi--><script async src="//dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script><meta name="generator" content="Hexo 5.4.0"></head><body><section class="profile-close" id="cxo-profile"><div class="profile-avatar"><i class="fa fa-caret-left"></i><img src="/img/assets/cat.png"></div><!--.profile-saying
+  i.fa.fa-comment
+  .saying--><div class="cxo-profile-inner"><div class="profile-name">jackcao95</div><div class="profile-signature">for me</div><div class="read-progress"></div></div></section><header id="cxo-intro" style="height: 70vh;background-image: url(/img/intro/index-bg.png);"><nav id="cxo-intro-nav"><section><div class="intro-nav-title"><a href="/">Mr.Jack's Blog</a></div><div class="intro-nav-label-box"><a href="/">Home</a><a href="/about/">About</a><a href="/archives/">Archives</a><a href="/tags/">Tags</a></div><i class="fa fa-bars intro-nav-menu"><div class="intro-nav-drop"><a href="/">Home</a><a href="/about/">About</a><a href="/archives/">Archives</a><a href="/tags/">Tags</a></div></i><div class="clear"></div></section></nav><h1 class="post-title">JS数组方法总结</h1><div class="post-intros"><div class="post-intro-meta"><span class="post-intro-time"><i class="post-intro-calendar fa fa-calendar"></i><span>2020-03-15</span></span></div><div class="post-intro-read"><span> Word count: <span class="post-count">921</span> | Reading time: <span class="post-count">4</span>min</span></div></div></header><article class="cxo-up" id="cxo-content-outer"><section id="cxo-content-inner"><article class="article-entry" id="post"><h2 id="一、操作方法（改变原数组）"><a href="#一、操作方法（改变原数组）" class="headerlink" title="一、操作方法（改变原数组）"></a>一、操作方法（改变原数组）</h2><p>1、push() 向后添加一个元素，返回新数组的长度</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> arr = [<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>]</span><br><span class="line"><span class="keyword">let</span> x = arr.push(<span class="number">99</span>);</span><br><span class="line"><span class="built_in">console</span>.log(arr);  <span class="comment">// [1, 2, 3, 4, 99]</span></span><br><span class="line"><span class="built_in">console</span>.log(x);    <span class="comment">// 5</span></span><br></pre></td></tr></table></figure>
+
+<p>2、pop() 从后删除一个元素，返回被删除的元素</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> arr = [<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">99</span>]</span><br><span class="line"><span class="keyword">let</span> x = arr.pop()</span><br><span class="line"><span class="built_in">console</span>.log(arr);  <span class="comment">// [1, 2, 3, 4]</span></span><br><span class="line"><span class="built_in">console</span>.log(x);    <span class="comment">// 99</span></span><br></pre></td></tr></table></figure>
+
+<p>3、unshift() 向前添加一个元素，返回新数组的长度</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> arr = [<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>]</span><br><span class="line"><span class="keyword">let</span> x = arr.unshift(<span class="number">99</span>)</span><br><span class="line"><span class="built_in">console</span>.log(arr);  <span class="comment">// [99, 1, 2, 3, 4]</span></span><br><span class="line"><span class="built_in">console</span>.log(x);    <span class="comment">// 5</span></span><br></pre></td></tr></table></figure>
+
+<p>4、shift() 从前删除一个元素，返回被删除的元素</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> arr = [<span class="number">99</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>]</span><br><span class="line"><span class="keyword">let</span> x = arr.shift(<span class="number">99</span>)</span><br><span class="line"><span class="built_in">console</span>.log(arr);  <span class="comment">// [1, 2, 3, 4]</span></span><br><span class="line"><span class="built_in">console</span>.log(x);    <span class="comment">// 99</span></span><br></pre></td></tr></table></figure>
+
+<p>5、splice(index, len) 从index开始删除len个元素，返回被删除的元素</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> arr = [<span class="string">&#x27;a&#x27;</span>, <span class="string">&#x27;b&#x27;</span>, <span class="string">&#x27;c&#x27;</span>, <span class="string">&#x27;d&#x27;</span>, <span class="string">&#x27;e&#x27;</span>, <span class="string">&#x27;f&#x27;</span>, <span class="string">&#x27;g&#x27;</span>];</span><br><span class="line"><span class="keyword">let</span> x = arr.splice(<span class="number">2</span>, <span class="number">3</span>);</span><br><span class="line"><span class="built_in">console</span>.log(x);      <span class="comment">// [&quot;c&quot;, &quot;d&quot;, &quot;e&quot;]</span></span><br><span class="line"><span class="built_in">console</span>.log(arr);    <span class="comment">// [&quot;a&quot;, &quot;b&quot;, &quot;f&quot;, &quot;g&quot;]</span></span><br></pre></td></tr></table></figure>
+
+<p>6、reverse() 反转</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> arr = [<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>];</span><br><span class="line"><span class="built_in">console</span>.log(arr.reverse())   <span class="comment">// [4, 3, 2, 1]</span></span><br></pre></td></tr></table></figure>
+
+<p>7、sort() 排序</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> arr = [<span class="number">2</span>, <span class="number">4</span>, <span class="number">1</span>, <span class="number">3</span>];</span><br><span class="line">arr.sort(<span class="function">(<span class="params">a, b</span>) =&gt;</span> a - b);  <span class="comment">// [1, 2, 3, 4]</span></span><br><span class="line">arr.sort(<span class="function">(<span class="params">a, b</span>) =&gt;</span> b - a);  <span class="comment">// [4, 3, 2, 1]</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="二、操作方法（不改变原数组）"><a href="#二、操作方法（不改变原数组）" class="headerlink" title="二、操作方法（不改变原数组）"></a>二、操作方法（不改变原数组）</h2><p>1、slice(start, end) 提取数组（index &gt;= start &amp;&amp; index &lt; end）</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> arr = [<span class="string">&#x27;a&#x27;</span>, <span class="string">&#x27;b&#x27;</span>, <span class="string">&#x27;c&#x27;</span>, <span class="string">&#x27;d&#x27;</span>];</span><br><span class="line"><span class="keyword">let</span> x = arr.slice(<span class="number">1</span>, <span class="number">3</span>);</span><br><span class="line"><span class="built_in">console</span>.log(x);    <span class="comment">// [&quot;b&quot;, &quot;c&quot;]</span></span><br><span class="line"><span class="built_in">console</span>.log(arr);  <span class="comment">// [&#x27;a&#x27;, &#x27;b&#x27;, &#x27;c&#x27;, &#x27;d&#x27;]</span></span><br></pre></td></tr></table></figure>
+
+<p>2、concat() 连接数组 返回新数组</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> arr1 = [<span class="number">1</span>, <span class="number">2</span>];</span><br><span class="line"><span class="keyword">let</span> arr2 = [<span class="number">3</span>, <span class="number">4</span>];</span><br><span class="line"><span class="keyword">let</span> res = arr1.concat(arr2);</span><br><span class="line"><span class="comment">// 可以连接多个  let res = arr1.concat(arr2, arr3, ...)</span></span><br><span class="line"><span class="built_in">console</span>.log(res) <span class="comment">// [1, 2, 3, 4];</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 还能这样</span></span><br><span class="line"><span class="keyword">let</span> arr4 = [<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>]</span><br><span class="line"><span class="keyword">let</span> arr5 = arr4.concat(<span class="number">1</span>,<span class="string">&#x27;xxx&#x27;</span>, &#123;<span class="attr">a</span>: <span class="number">1</span>&#125;)</span><br><span class="line"><span class="built_in">console</span>.log(arr5) <span class="comment">// [1, 2, 3, 4, 5, 6, 1, &quot;xxx&quot;, &#123;a: 1&#125;]</span></span><br></pre></td></tr></table></figure>
+
+<p>3、join() 拼接字符串</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> arr = [<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>];</span><br><span class="line"><span class="built_in">console</span>.log(arr.join(<span class="string">&#x27;-&#x27;</span>))  <span class="comment">// &quot;1-2-3&quot;</span></span><br><span class="line"><span class="built_in">console</span>.log(arr.join(<span class="string">&#x27;&#x27;</span>))   <span class="comment">// &quot;123&quot;</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="三、遍历"><a href="#三、遍历" class="headerlink" title="三、遍历"></a>三、遍历</h2><p>1、forEach() 没有返回值</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> arr = [<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>];</span><br><span class="line">arr.forEach(<span class="function">(<span class="params">item, index</span>) =&gt;</span> &#123;</span><br><span class="line">    <span class="built_in">console</span>.log(item, index)  <span class="comment">//  1 0    2 1    3 2    4 3</span></span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+
+<p>2、map() 返回一个新数组</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> arr = [<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>];</span><br><span class="line"><span class="keyword">let</span> res = arr.map(<span class="function">(<span class="params">item, index</span>) =&gt;</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> item + <span class="number">1</span>;</span><br><span class="line">&#125;);</span><br><span class="line"><span class="built_in">console</span>.log(arr);  <span class="comment">// [1, 2, 3, 4]</span></span><br><span class="line"><span class="built_in">console</span>.log(res);  <span class="comment">// [2, 3, 4, 5]</span></span><br></pre></td></tr></table></figure>
+
+<p>3、filter() 返回满足条件的新数组</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> arr = [<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>];</span><br><span class="line"><span class="keyword">let</span> res = arr.filter(<span class="function">(<span class="params">item, index</span>) =&gt;</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> item &gt;= <span class="number">2</span>;</span><br><span class="line">&#125;);</span><br><span class="line"><span class="built_in">console</span>.log(arr);  <span class="comment">// [1, 2, 3, 4]</span></span><br><span class="line"><span class="built_in">console</span>.log(res);  <span class="comment">// [2, 3, 4]</span></span><br></pre></td></tr></table></figure>
+
+<p>4、some() 其中有满足条件的，返回true</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> arr = [<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>];</span><br><span class="line"><span class="keyword">let</span> res = arr.some(<span class="function">(<span class="params">item, index</span>) =&gt;</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> item &gt; <span class="number">3</span>;</span><br><span class="line">&#125;);</span><br><span class="line"><span class="built_in">console</span>.log(res);  <span class="comment">// true</span></span><br></pre></td></tr></table></figure>
+
+<p>5、every() 其中每一项都满足条件的，返回true</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> arr = [<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>];</span><br><span class="line"><span class="keyword">let</span> res = arr.every(<span class="function">(<span class="params">item, index</span>) =&gt;</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> item &gt; <span class="number">3</span>;</span><br><span class="line">&#125;);</span><br><span class="line"><span class="built_in">console</span>.log(res);  <span class="comment">// false</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> res2 = arr.every(<span class="function">(<span class="params">item, index</span>) =&gt;</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> item &gt;= <span class="number">1</span>;</span><br><span class="line">&#125;);</span><br><span class="line"><span class="built_in">console</span>.log(res2);  <span class="comment">// true</span></span><br></pre></td></tr></table></figure>
+
+<p>6、find() 返回第一个满足条件的值</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> arr = [<span class="number">10</span>, <span class="number">20</span>, <span class="number">30</span>, <span class="number">40</span>];</span><br><span class="line"><span class="keyword">let</span> res = arr.find(<span class="function">(<span class="params">item, index</span>) =&gt;</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> item &gt; <span class="number">20</span>;</span><br><span class="line">&#125;);</span><br><span class="line"><span class="built_in">console</span>.log(res);  <span class="comment">// 30</span></span><br></pre></td></tr></table></figure>
+
+<p>7、findIndex() 返回第一个满足条件的索引</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> arr = [<span class="number">10</span>, <span class="number">20</span>, <span class="number">30</span>, <span class="number">40</span>];</span><br><span class="line"><span class="keyword">let</span> res = arr.findIndex(<span class="function">(<span class="params">item, index</span>) =&gt;</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> item &gt; <span class="number">20</span>;</span><br><span class="line">&#125;);</span><br><span class="line"><span class="built_in">console</span>.log(res);  <span class="comment">// 2</span></span><br></pre></td></tr></table></figure>
+
+<p>8、reduce() 接收一个函数作为累加器，从左到右开始计算，最终返回一个累计的值</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> arr = [<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>];</span><br><span class="line"></span><br><span class="line"><span class="comment">// total: 必需。初始值, 或者计算结束后的返回值</span></span><br><span class="line"><span class="comment">// currentValue: 必需。当前元素</span></span><br><span class="line"><span class="comment">// currentIndex: 可选。当前元素的索引</span></span><br><span class="line"><span class="comment">// arr：可选。当前元素所属的数组对象。</span></span><br><span class="line"><span class="keyword">var</span> res = arr.reduceRight(<span class="function">(<span class="params">total, currentValue, currentIndex, arr</span>)=&gt;</span>&#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">&quot;total:&quot;</span>, total);</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">&quot;currentValue:&quot;</span>, currentValue);</span><br><span class="line">    <span class="keyword">return</span> total + currentValue;</span><br><span class="line">&#125;, <span class="number">10</span>) <span class="comment">// 10：可选。传递给函数的初始值</span></span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">&quot;res: &quot;</span>, res);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 输出</span></span><br><span class="line"><span class="comment">// total: 10</span></span><br><span class="line"><span class="comment">// currentValue: 4</span></span><br><span class="line"><span class="comment">// total: 14</span></span><br><span class="line"><span class="comment">// currentValue: 3</span></span><br><span class="line"><span class="comment">// total: 17</span></span><br><span class="line"><span class="comment">// currentValue: 2</span></span><br><span class="line"><span class="comment">// total: 19</span></span><br><span class="line"><span class="comment">// currentValue: 1</span></span><br><span class="line"><span class="comment">// res:  20</span></span><br></pre></td></tr></table></figure></article><!-- lincense--><div class="post-paginator"><a class="prevSlogan" href="/2020/04/12/%E5%BE%AE%E4%BF%A1%E5%B0%8F%E7%A8%8B%E5%BA%8F%E4%BA%91%E5%BC%80%E5%8F%91/" title="微信小程序云开发"><span>< PreviousPost</span><br><span class="prevTitle">微信小程序云开发</span></a><a class="nextSlogan" href="/2020/03/09/%E7%AC%AC%E4%B8%80%E7%AF%87%E5%8D%9A%E5%AE%A2/" title="第一篇博客"><span>NextPost ></span><br><span class="nextTitle">第一篇博客</span></a><div class="clear"></div></div><div id="comment"></div></section></article><footer id="cxo-footer-outer"><div id="cxo-footer-inner"><p class="footer-container"><span>Site by </span><a target="_blank" rel="noopener" href="http://hexo.io"><span>Hexo</span></a><span> | theme </span><a target="_blank" rel="noopener" href="https://github.com/Longlongyu/hexo-theme-Cxo"><span>Cxo</span></a></p><i class="fa fa-user"> </i><span id="busuanzi_value_site_uv"></span><span> | </span><i class="fa fa-eye"> </i><span id="busuanzi_value_site_pv"></span></div></footer><!-- catelog--><div class="toc-wrapper" style="top: 70vh;"><div class="toc-catalog"><i class="fa fa-list"> </i><span>CATALOG</span></div><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E6%93%8D%E4%BD%9C%E6%96%B9%E6%B3%95%EF%BC%88%E6%94%B9%E5%8F%98%E5%8E%9F%E6%95%B0%E7%BB%84%EF%BC%89"><span class="toc-number">1.</span> <span class="toc-text">一、操作方法（改变原数组）</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E6%93%8D%E4%BD%9C%E6%96%B9%E6%B3%95%EF%BC%88%E4%B8%8D%E6%94%B9%E5%8F%98%E5%8E%9F%E6%95%B0%E7%BB%84%EF%BC%89"><span class="toc-number">2.</span> <span class="toc-text">二、操作方法（不改变原数组）</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%E3%80%81%E9%81%8D%E5%8E%86"><span class="toc-number">3.</span> <span class="toc-text">三、遍历</span></a></li></ol></div><!-- top--><i class="fa fa-arrow-up close" id="go-up" aria-hidden="true"></i><script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/wanko.model.json"},"display":{"position":"right","width":245,"height":415},"mobile":{"show":false,"scale":0.5},"react":{"opacityDefault":0.7},"log":false});</script></body></html>

@@ -1,0 +1,130 @@
+<script type="text/javascript"
+color="220,220,220" opacity='0.7' zIndex="-2" count="200" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js">
+</script>
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"><meta name="author" content="John Doe"><meta name="renderer" content="webkit"><meta name="copyright" content="John Doe"><meta name="keywords" content="Hexo"><meta name="description" content=""><meta name="Cache-Control" content="no-cache"><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><title>你不知道的webpack和webpack-dev-serve高级玩法 · Mr.Jack's Blog</title><link rel="stylesheet" href="/css/style.css?v=2018.7.9"><link rel="stylesheet" href="/css/animation.css?v=2018.7.9"><link rel="icon" href="/img/assets/favicon.ico"><link rel="stylesheet" href="https://cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css?version=1.5.6"><!-- scripts--><script>(function( w ){
+  "use strict";
+  // rel=preload support test
+  if( !w.loadCSS ){
+    w.loadCSS = function(){};
+  }
+  // define on the loadCSS obj
+  var rp = loadCSS.relpreload = {};
+  // rel=preload feature support test
+  // runs once and returns a function for compat purposes
+  rp.support = (function(){
+    var ret;
+    try {
+      ret = w.document.createElement( "link" ).relList.supports( "preload" );
+    } catch (e) {
+      ret = false;
+    }
+    return function(){
+      return ret;
+    };
+  })();
+
+  // if preload isn't supported, get an asynchronous load by using a non-matching media attribute
+  // then change that media back to its intended value on load
+  rp.bindMediaToggle = function( link ){
+    // remember existing media attr for ultimate state, or default to 'all'
+    var finalMedia = link.media || "all";
+
+    function enableStylesheet(){
+      link.media = finalMedia;
+    }
+
+    // bind load handlers to enable media
+    if( link.addEventListener ){
+      link.addEventListener( "load", enableStylesheet );
+    } else if( link.attachEvent ){
+      link.attachEvent( "onload", enableStylesheet );
+    }
+
+    // Set rel and non-applicable media type to start an async request
+    // note: timeout allows this to happen async to let rendering continue in IE
+    setTimeout(function(){
+      link.rel = "stylesheet";
+      link.media = "only x";
+    });
+    // also enable media after 3 seconds,
+    // which will catch very old browsers (android 2.x, old firefox) that don't support onload on link
+    setTimeout( enableStylesheet, 3000 );
+  };
+
+  // loop through link elements in DOM
+  rp.poly = function(){
+    // double check this to prevent external calls from running
+    if( rp.support() ){
+      return;
+    }
+    var links = w.document.getElementsByTagName( "link" );
+    for( var i = 0; i < links.length; i++ ){
+      var link = links[ i ];
+      // qualify links to those with rel=preload and as=style attrs
+      if( link.rel === "preload" && link.getAttribute( "as" ) === "style" && !link.getAttribute( "data-loadcss" ) ){
+        // prevent rerunning on link
+        link.setAttribute( "data-loadcss", true );
+        // bind listeners to toggle media back
+        rp.bindMediaToggle( link );
+      }
+    }
+  };
+
+  // if unsupported, run the polyfill
+  if( !rp.support() ){
+    // run once at least
+    rp.poly();
+
+    // rerun poly on an interval until onload
+    var run = w.setInterval( rp.poly, 500 );
+    if( w.addEventListener ){
+      w.addEventListener( "load", function(){
+        rp.poly();
+        w.clearInterval( run );
+      } );
+    } else if( w.attachEvent ){
+      w.attachEvent( "onload", function(){
+        rp.poly();
+        w.clearInterval( run );
+      } );
+    }
+  }
+
+
+  // commonjs
+  if( typeof exports !== "undefined" ){
+    exports.loadCSS = loadCSS;
+  }
+  else {
+    w.loadCSS = loadCSS;
+  }
+}( typeof global !== "undefined" ? global : this ) );</script><script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js" defer></script><script src="/js/main.js?v=2018.7.9" defer></script><!-- fancybox--><link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'"><script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.js" defer></script><!-- busuanzi--><script async src="//dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script><meta name="generator" content="Hexo 5.4.0"></head><body><section class="profile-close" id="cxo-profile"><div class="profile-avatar"><i class="fa fa-caret-left"></i><img src="/img/assets/cat.png"></div><!--.profile-saying
+  i.fa.fa-comment
+  .saying--><div class="cxo-profile-inner"><div class="profile-name">jackcao95</div><div class="profile-signature">for me</div><div class="read-progress"></div></div></section><header id="cxo-intro" style="height: 70vh;background-image: url(/img/intro/index-bg.png);"><nav id="cxo-intro-nav"><section><div class="intro-nav-title"><a href="/">Mr.Jack's Blog</a></div><div class="intro-nav-label-box"><a href="/">Home</a><a href="/about/">About</a><a href="/archives/">Archives</a><a href="/tags/">Tags</a></div><i class="fa fa-bars intro-nav-menu"><div class="intro-nav-drop"><a href="/">Home</a><a href="/about/">About</a><a href="/archives/">Archives</a><a href="/tags/">Tags</a></div></i><div class="clear"></div></section></nav><h1 class="post-title">你不知道的webpack和webpack-dev-serve高级玩法</h1><div class="post-intros"><div class="post-intro-meta"><span class="post-intro-time"><i class="post-intro-calendar fa fa-calendar"></i><span>2020-12-23</span></span></div><div class="post-intro-read"><span> Word count: <span class="post-count">1.5k</span> | Reading time: <span class="post-count">5</span>min</span></div></div></header><article class="cxo-up" id="cxo-content-outer"><section id="cxo-content-inner"><article class="article-entry" id="post"><p><strong>把webpack作为一个node module使用</strong></p>
+<p>大部分情况下，我们都直接命令行启动webpack进行打包，就可以满足我们的需求。但毕竟<strong>计划赶不上变化</strong>，有时候你会发现用命令行启动webpack变得不是那么方便。比如我们在调试<strong>react的服务端渲染</strong>的时候，我们不可能每次有文件更新，等着webpack打包完输出到硬盘上某个文件，然后你重启服务度去加载这个新的文件，因为这太浪费时间了，毕竟开发时你随时都可能改代码，而且改动可能还很小。</p>
+<p>那么要解决这个问题怎么办呢？我们可以在启动nodejs服务的时候，顺带启动webpack打包服务，这样我们可以在nodejs的执行环境中拿到webpack打包的上下文，就可以不重启服务但每次文件更新都可以拿到最新的bundle。那么具体怎么做呢？很简单，看下面的代码：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> webpack = <span class="built_in">require</span>(<span class="string">&#x27;webpack&#x27;</span>)</span><br><span class="line"> <span class="keyword">const</span> webpackConfig = <span class="built_in">require</span>(<span class="string">&#x27;/path/to/your/config.js&#x27;</span>)</span><br><span class="line"></span><br><span class="line"> <span class="keyword">const</span> compiler = webpack(webpackConfig)</span><br><span class="line"></span><br><span class="line"> compiler.run(<span class="function">(<span class="params">err, stats</span>) =&gt;</span> &#123;<span class="comment">/* ...处理结果 */</span>&#125;)</span><br><span class="line"> <span class="comment">// or</span></span><br><span class="line"> compiler.watch(&#123;</span><br><span class="line">     <span class="comment">// watch options</span></span><br><span class="line"> &#125;, <span class="function">(<span class="params">err, stats</span>) =&gt;</span> &#123;<span class="comment">/* ...处理结果 */</span>&#125;)</span><br></pre></td></tr></table></figure>
+
+<p>通过给webpack传入配置，可以得到一个webpack的compiler，你可以调用<code>compiler.run</code>来一次性调用webpack的打包服务，他接受一个callback方法，你可以在里面处理他的打包结果。</p>
+<p>同时你也可以调用<code>compiler.watch</code>来让webpack监听文件变化，每次更新打包结束都会调用你传入的callback。而第一个参数是watchOptions，跟配置文件里面的watchOptions是一样的。</p>
+<p>但是这样做了之后呢，webpack依旧是把文件打包到本地磁盘，显然在开发的时候我们并没有这个需求，我希望的是提高打包速度，而写入磁盘明显是个低效率的操作，我们要避免这个问题。怎么做呢？还在webpack为我们提供了一个配置项，我们可以指定webpack输出的文件系统。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> MemoryFS = <span class="built_in">require</span>(<span class="string">&#x27;memory-fs&#x27;</span>)</span><br><span class="line"><span class="keyword">const</span> mfs = <span class="keyword">new</span> MemoryFS()</span><br><span class="line">compiler.outputFileSystem = mfs</span><br></pre></td></tr></table></figure>
+
+<p>memory-fs是一个在内存中存储读取文件的文件系统类库，他的api和nodejs默认的fs一模一样，所以直接给<code>compiler.outputFileSystem</code>之后，所有webpack输出的文件都将存储在内存里面。而随后，我们都可以通过mfs对象，读取到这些文件。速度瞬间上了一个档次有木有。其实webpack-dev-server内部也用了这个方法，他才能快速得帮我们更新代码。</p>
+<p><strong>通过nodejs启动webpack-dev-server</strong></p>
+<p>同样的道理，我们有时候也需要在nodejs在启动webpack-dev-server，而webpack-dev-server和webpack不同的是，他本身自己也会启动一个服务，并监听独立的端口。但是我们也有办法让他不这么做，我们可以让只启动我们自己的服务，但同时可以具备webpack-dev-server那些牛逼的功能，怎么做呢？</p>
+<p>我们要用两个工具：<code>webpack-dev-middleware</code>和<code>webpack-hot-middleware</code>，这两个是express的中间件，如果你的服务使用express开发的，那么你可以很方便的把这两个工具集成到你的服务上，我们来看看怎么做：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">const express &#x3D; require(&#39;express&#39;)</span><br><span class="line">const devMiddleware &#x3D; require(&#39;webpack-dev-middleware&#39;)</span><br><span class="line">const hotMiddleware &#x3D; require(&#39;webpack-hot-middleware&#39;)</span><br><span class="line"></span><br><span class="line">const app &#x3D; express()</span><br><span class="line">app.use(devMiddleware(compiler, &#123;&#x2F;* dev config *&#x2F;&#125;))</span><br><span class="line">app.use(hotMiddleware(compiler))</span><br><span class="line">&#x2F;&#x2F; ...your server code here</span><br></pre></td></tr></table></figure>
+
+<p>这里的compiler就是我们上面webpack生成的compiler，devMiddleware的config跟webpack配置里面的<code>devServer</code>的配置基本类似，但是也有几个不一样的配置，具体可以移步<a target="_blank" rel="noopener" href="https://github.com/webpack/webpack-dev-middleware">这里</a>查看详细api</p>
+<p>但是这样还不能实现热更替功能，在使用hotMiddleware的时候，我们需要在我们webpack配置的entry中加入一个文件<code>webpack-hot-middleware/client</code>，这是一共在客户端跟hotMiddleware进行通信的js，有了它之后，我们客户端才能接收到新的代码并覆盖老的代码。</p>
+<p><strong>你以为这样就结束了吗？还有呢</strong></p>
+<p>虽然通过上面的方式我们可以只起一个服务，但是这也有弊端，就是webpack的打包服务要随着我们重启node服务而重启，而总所周知，如果你的前端应用很复杂，那么webpack打包的速度会很慢，重启webpack的成本还是很高的，如果你经常要改服务端的代码，那这就不划算了。那有没有办法能把这两个服务分开，但又是在node中启动呢？</p>
+<p>答案当然是有的，<strong>只要你有需求，没有你解决不了的问题，前提是你敢想敢做</strong></p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> WebpackDevServer = <span class="built_in">require</span>(<span class="string">&#x27;webpack-dev-server&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> devServer = <span class="keyword">new</span> WebpackDevServer(compiler, &#123;<span class="comment">/* devServer config */</span>&#125;)</span><br><span class="line">devServer.listen(<span class="comment">/* port */</span>)</span><br></pre></td></tr></table></figure>
+
+<p>这样子你就可以通过nodejs启动webpack-dev-server了</p>
+<p>这是在webpack-dev-server的文档中没有提到的，其实他也是可以直接作为一个node module使用的。</p>
+<p>当然如果你的express server和dev server都写在一个js入口文件中启动，那么你每次修改服务端代码，还是顺便会重启dev server。这时候如果你要区分，可以把这两个入口文件分开，然后在一个脚本中通过<code>child_process</code>分别启动两个服务，然后在这个脚本中控制这两个服务什么时候该重启，这一块我就不深入讲了，大家可以自己去研究一下，只要知道了上面这些方法，你就可以随意控制你的服务在何时启动，又在何时结束。</p>
+<p>以上就是webpack和webpack-dev-server的一些高级玩法，当然我这里只是抛砖引玉，webpack太过复杂，如果要把每个细节写清楚估计能写很厚一本书。写这篇文章的用意更多是希望大家能抛开很多流水线化的编程习惯，去拥抱变化，每一个强大的工具或者框架总有各种等着你去挖掘的用法，你只有往深入去研究，才能解锁更多姿势。</p>
+</article><!-- lincense--><div class="post-paginator"><a class="nextSlogan" href="/2020/11/03/%E5%80%9F%E5%8A%A9axios%E7%9A%84%E6%8B%A6%E6%88%AA%E5%99%A8%E5%AE%9E%E7%8E%B0Vue-js%E4%B8%AD%E7%99%BB%E5%BD%95%E7%8A%B6%E6%80%81%E6%A3%80%E9%AA%8C%E7%9A%84%E6%80%9D%E8%B7%AF/" title="借助axios的拦截器实现Vue.js中登录状态检验的思路"><span>NextPost ></span><br><span class="nextTitle">借助axios的拦截器实现Vue.js中登录状态检验的思路</span></a><div class="clear"></div></div><div id="comment"></div></section></article><footer id="cxo-footer-outer"><div id="cxo-footer-inner"><p class="footer-container"><span>Site by </span><a target="_blank" rel="noopener" href="http://hexo.io"><span>Hexo</span></a><span> | theme </span><a target="_blank" rel="noopener" href="https://github.com/Longlongyu/hexo-theme-Cxo"><span>Cxo</span></a></p><i class="fa fa-user"> </i><span id="busuanzi_value_site_uv"></span><span> | </span><i class="fa fa-eye"> </i><span id="busuanzi_value_site_pv"></span></div></footer><!-- catelog--><div class="toc-wrapper" style="top: 70vh;"><div class="toc-catalog"><i class="fa fa-list"> </i><span>CATALOG</span></div></div><!-- top--><i class="fa fa-arrow-up close" id="go-up" aria-hidden="true"></i><script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/wanko.model.json"},"display":{"position":"right","width":245,"height":415},"mobile":{"show":false,"scale":0.5},"react":{"opacityDefault":0.7},"log":false});</script></body></html>
